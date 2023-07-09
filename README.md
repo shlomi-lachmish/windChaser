@@ -1,10 +1,10 @@
 # windChaser
-##setup firebase tool
+## setup firebase tool
 npm install -g firebase-tools
-##to get a token
+## to get a token
 firebase login:ci
 export GToken=...
-##Deploy to cloud
+## Deploy to cloud
 firebase deploy --only functions --token=$GToken
-##Project Console 
+## Project Console 
 https://console.firebase.google.com/project/windchaser-d1c0d/overview
