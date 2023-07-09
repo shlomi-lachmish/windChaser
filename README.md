@@ -2,7 +2,7 @@
 ## Setup firebase tools
 npm install -g firebase-tools
 ## Get a token
-firebase login:ci
+firebase login:ci <br />
 export GToken=...
 ## Deploy to cloud
 firebase deploy --only functions --token=$GToken
