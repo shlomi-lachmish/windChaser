@@ -24,6 +24,7 @@ const firestore = new Firestore({
 
 exports.windTrends = onRequest((req, res) => {
     logger.info("Hello logs!", {structuredData: true});
+    const isSunset = (dt,sunset)=>((dt>sunset)?true:false)
     const getCurrentWindSpeed = async() => {
         let docData ={ firestore:"before db read"}
         try {
@@ -44,8 +45,9 @@ exports.windTrends = onRequest((req, res) => {
         }else{
             logger.info("skipping weather api we already have data from the last 60 min", {structuredData: true});
         }
+        const isNight = isSunset(weatherData.current.dt,weatherData.current.sunset )
         const currentDate = Date.now()
-        const updatedObj = {"owners":"Team Lachmish",...docData,weatherInfo:{date:currentDate,...weatherData}}
+        const updatedObj = {"isSunset":isNight, "owners":"Team Lachmish",...docData,weatherInfo:{date:currentDate,...weatherData}}
         await firestore.collection(COLLECTION_NAME).doc("current").update(updatedObj)
       return res.status(200).send(updatedObj)
     }
