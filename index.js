@@ -49,8 +49,16 @@ exports.windTrends = onRequest((req, res) => {
         const isNight = isSunset(weatherData.current.dt,weatherData.current.sunset )
         const currentDate = Date.now()
         const currentWindSpeed = getKnotes(weatherData.current.wind_speed)
-
-        const updatedObj = {dataObj:{"isSunset":isNight, "owners":"Team Lachmish", currentWind:currentWindSpeed + 'knots'},...docData,weatherInfo:{date:currentDate,...weatherData}}
+        const goodHours = weatherData.hourly.filter(d=>{
+            const isGoodWindSpeed = (d.wind_speed*1.94)>11?true:false
+            const isDayTime = isSunset(d.dt, weatherData.current.sunset)
+            if(isGoodWindSpeed && isDayTime){
+                return true
+            }else{
+                return false
+            }
+        })
+        const updatedObj = {dataObj:{"isSunset":isNight, "owners":"Team Lachmish", currentWind:currentWindSpeed + ' knots!', goodHours:goodHours},...docData,weatherInfo:{date:currentDate,...weatherData}}
         await firestore.collection(COLLECTION_NAME).doc("current").update(updatedObj)
       return res.status(200).send(updatedObj)
     }
