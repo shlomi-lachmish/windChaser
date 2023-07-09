@@ -45,8 +45,9 @@ exports.windTrends = onRequest((req, res) => {
             logger.info("skipping weather api we already have data from the last 60 min", {structuredData: true});
         }
         const currentDate = Date.now()
-        await firestore.collection(COLLECTION_NAME).doc("current").update({"owners":"Team Lachmish",...docData,weatherInfo:{date:currentDate,...weatherData}})
-      return res.status(200).send({"owners":"Team Lachmish",...docData,weatherInfo:{date:currentDate,...weatherData}})
+        const updatedObj = {"owners":"Team Lachmish",...docData,weatherInfo:{date:currentDate,...weatherData}}
+        await firestore.collection(COLLECTION_NAME).doc("current").update(updatedObj)
+      return res.status(200).send(updatedObj)
     }
     return getCurrentWindSpeed()
     
