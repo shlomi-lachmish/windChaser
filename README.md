@@ -1,7 +1,7 @@
 # windChaser
-## setup firebase tool
+## Setup firebase tools
 npm install -g firebase-tools
-## to get a token
+## Get a token
 firebase login:ci
 export GToken=...
 ## Deploy to cloud
