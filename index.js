@@ -58,9 +58,43 @@ exports.windTrends = onRequest((req, res) => {
                 return false
             }
         })
-        const updatedObj = {dataObj:{"isSunset":isNight, "owners":"Team Lachmish", currentWind:currentWindSpeed + ' knots!', goodHours:goodHours},...docData,weatherInfo:{date:currentDate,...weatherData}}
+        let goodHoursMap
+        await Promise.all(
+            goodHoursMap = goodHours.map(h=>{
+                const returnObj = {}
+                returnObj.dateText = new Date(h.dt * 1000)
+                returnObj.wind_speed =  (Math.round(h.wind_speed*1.94 * 10) / 10).toFixed(1)
+                returnObj.wind_gust =(Math.round(h.wind_gust*1.94 * 10) / 10).toFixed(1)
+                returnObj.wind_deg = h.wind_deg
+                return returnObj
+            })
+        )
+        const goodDays = weatherData.daily.filter(d=>{
+            const isGoodWindSpeed = (d.wind_speed*1.94)>11?true:false
+            const isDayTime = isSunset(d.dt, weatherData.current.sunset)
+            if(isGoodWindSpeed && isDayTime){
+                return true
+            }else{
+                return false
+            }
+        })
+        let goodDaysMap
+        await Promise.all(
+            goodDaysMap = goodDays.map(h=>{
+                const returnObj = {}
+                returnObj.dateText = new Date(h.dt * 1000)
+                returnObj.wind_speed =  (Math.round(h.wind_speed*1.94 * 10) / 10).toFixed(1)
+                returnObj.wind_gust =(Math.round(h.wind_gust*1.94 * 10) / 10).toFixed(1)
+                returnObj.wind_deg = h.wind_deg
+                return returnObj
+            })
+        )
+        logger.info("just before update the db", {structuredData: true});
+        // logger.info(goodHoursMap, {structuredData: true});
+        const windText = "a northerly wind is 0°, an easterly wind is 90°, a southerly wind is 180°, and a westerly wind is 270°"
+        const updatedObj = {...docData,weatherInfo:{date:currentDate,...weatherData},dataObj:{"wind_deg_text":windText, isSunset:isNight, "owners":"Team Lachmish", currentWind:currentWindSpeed + ' knots!', goodHours:goodHoursMap, goodDays:goodDaysMap}}
         await firestore.collection(COLLECTION_NAME).doc("current").update(updatedObj)
-      return res.status(200).send(updatedObj)
+        return res.status(200).send(updatedObj)
     }
     return getCurrentWindSpeed()
     
