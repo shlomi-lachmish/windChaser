@@ -35,7 +35,7 @@ exports.windTrends = onRequest((req, res) => {
             return {err:"error fetching data from firestore"}
         }
         let weatherData = {...docData.weatherInfo,date: Date.now()}
-        if(Date.now() / 1000 - 3600 > docData.weatherInfo.current.dt){
+        if(Date.now() / 1000 - 1790 > docData.weatherInfo.current.dt){
             try {
                 logger.info("get fresh data from weather api", {structuredData: true});
                 const resFetch = await fetch(WEATHER_API_URL+docData.appid);
@@ -44,15 +44,15 @@ exports.windTrends = onRequest((req, res) => {
                 return {err:"error fetching data from weather api"}
             }
         }else{
-            logger.info("skipping weather api we already have data from the last 60 min", {structuredData: true});
+            logger.info("skipping weather api we already have data from the last 30 min", {structuredData: true});
         }
         const isNight = isSunset(weatherData.current.dt,weatherData.current.sunset )
         const currentDate = Date.now()
         const currentWindSpeed = getKnotes(weatherData.current.wind_speed)
         const goodHours = weatherData.hourly.filter(d=>{
             const isGoodWindSpeed = (d.wind_speed*1.94)>11?true:false
-            const isDayTime = isSunset(d.dt, weatherData.current.sunset)
-            if(isGoodWindSpeed && isDayTime){
+            const isNidghtTime = isSunset(d.dt, weatherData.current.sunset)
+            if(isGoodWindSpeed && !isNidghtTime){
                 return true
             }else{
                 return false
@@ -71,8 +71,8 @@ exports.windTrends = onRequest((req, res) => {
         )
         const goodDays = weatherData.daily.filter(d=>{
             const isGoodWindSpeed = (d.wind_speed*1.94)>11?true:false
-            const isDayTime = isSunset(d.dt, weatherData.current.sunset)
-            if(isGoodWindSpeed && isDayTime){
+            const isNidghtTime = isSunset(d.dt, weatherData.current.sunset)
+            if(isGoodWindSpeed && !isNidghtTime){
                 return true
             }else{
                 return false
